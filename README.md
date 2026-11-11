@@ -26,7 +26,9 @@ prestadoras de serviços de ativos virtuais (PSAV). Repositório: https://github
 2. Baixe o servidor e confirme que ele sobe sem erro. Com a entrada vazia ele termina sozinho:
    uvx --from git+https://github.com/BrunooMoniz/normas-mcp normas-mcp < /dev/null
 
-3. Registre o servidor no cliente em que você está rodando, valendo para todos os meus projetos:
+3. Registre o servidor no cliente em que você está rodando, valendo para todos os meus projetos. Nos comandos
+   abaixo, troque uvx pelo caminho completo que `which uvx` devolver (`where uvx` no Windows): cliente aberto
+   fora do terminal pode não achar o comando.
    - Claude Code:
      claude mcp add --scope user normas-psav -- uvx --from git+https://github.com/BrunooMoniz/normas-mcp normas-mcp
    - Codex:
