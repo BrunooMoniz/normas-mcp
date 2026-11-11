@@ -1,0 +1,46 @@
+name: atualizar
+
+# Uma vez por dia: refaz o índice de PSAV a partir dos acervos públicos e publica se algo mudou.
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+  push:  # roda também quando o código muda, para validar a mudança na hora
+    branches: [main]
+    paths: [".github/workflows/atualizar.yml", "scripts/**", "src/**/*.py", "tests/**", "pyproject.toml"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: atualizar
+  cancel-in-progress: false
+
+jobs:
+  atualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: BrunooMoniz/normas-bcb
+          path: _acervos/normas-bcb
+      - uses: actions/checkout@v7
+        with:
+          repository: BrunooMoniz/normas-cvm
+          path: _acervos/normas-cvm
+      - uses: astral-sh/setup-uv@v10.3.2  # sem tag de versão maior; versão exata
+      - name: Índice
+        run: python3 scripts/montar_indice.py --bcb _acervos/normas-bcb --cvm _acervos/normas-cvm
+      - name: Testes
+        run: uv run -q python -m unittest discover -s tests
+      - name: Publicar
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add src/normas_mcp/dados
+          git diff --cached --quiet && { echo "nada novo"; exit 0; }
+          git commit -q -m "dados: índice de $(date -u +%d/%m/%Y)"
+          git pull -q --rebase origin main
+          git push -q origin main
